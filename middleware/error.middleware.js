@@ -2,9 +2,7 @@ const {
     isCelebrateError,
     Segments
 } = require('celebrate');
-const {
-    x
-} = require('joi');
+
 
 
 const errorHandler = (err, req, res, next) => {
@@ -16,11 +14,16 @@ const errorHandler = (err, req, res, next) => {
         let message = err.message || "Unknown Error!"
 
         if (isCelebrateError(err)) {
-            let errors = err.details.get(Segments.BODY).details;
-            let mapped = (errors.map(x => {
-                return x.message
-            }))
-            message = mapped.join(', ');
+            if (err.details.get(Segments.BODY)) {
+                let errors = err.details.get(Segments.BODY).details;
+                let mapped = (errors.map(x => {
+                    return x.message
+                }))
+                message = mapped.join(', ');
+            }
+            if (err.details.get(Segments.PARAMS)) {
+                message = 'Incorrect params!';
+            }
         }
         res.send({
             'Error': message

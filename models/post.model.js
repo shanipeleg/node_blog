@@ -1,7 +1,6 @@
 const mongoose = require('mongoose');
 
 const postSchema = new mongoose.Schema({
-    _id: mongoose.Schema.Types.ObjectId,
     title: {
         type: String,
         required: true
@@ -10,6 +9,11 @@ const postSchema = new mongoose.Schema({
         type: String,
         required: true
     },
+    creator: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User',
+        required: true
+    }
 
 }, {
     timestamps: true

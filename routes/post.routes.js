@@ -2,6 +2,8 @@ const express = require('express');
 const router = express.Router();
 const schema = require('../schemas/post.schema');
 const controller = require('../controllers/post.controller');
+const Joi = require('joi');
+Joi.objectId = require('joi-objectid')(Joi)
 const {
     celebrate,
     Segments,
@@ -10,7 +12,11 @@ const {
 
 router.get('/', controller.getAllPosts);
 
-router.get('/:id', controller.getOnePost);
+router.get('/:id', celebrate({
+    [Segments.PARAMS]: {
+        id: Joi.objectId()
+    }
+}), controller.getOnePost);
 
 router.post('/', celebrate({
     [Segments.BODY]: schema
@@ -18,10 +24,12 @@ router.post('/', celebrate({
 
 router.put('/:id', celebrate({
     [Segments.BODY]: schema
-}, {
-    mode: Modes.FULL
 }), controller.updateOnePost);
 
-router.delete('/:id', controller.deleteOnePost);
+router.delete('/:id', celebrate({
+    [Segments.PARAMS]: {
+        id: Joi.objectId()
+    }
+}), controller.deleteOnePost);
 
 module.exports = router;

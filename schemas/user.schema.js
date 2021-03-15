@@ -1,7 +1,7 @@
 const Joi = require('joi');
 
 const schema = Joi.object().keys({
-    username: Joi.string()
+    userName: Joi.string()
         .alphanum()
         .min(3)
         .max(20)
@@ -18,7 +18,10 @@ const schema = Joi.object().keys({
         .alphanum()
         .min(2)
         .max(30)
-        .required()
+        .required(),
+    birthday: Joi
+        .date().
+    optional()
 });
 
 module.exports = schema;

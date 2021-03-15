@@ -1,8 +1,9 @@
 const Post = require('../models/post.model')
+const ResourceNotFound = require('../errors/ResourceNotFound.error');
 
 exports.getAllPosts = async (req, res, next) => {
     try {
-        const posts = await Post.find({});
+        const posts = await Post.find({}).populate('creator');
         res.json(posts);
     } catch (err) {
         next(err);
@@ -11,19 +12,21 @@ exports.getAllPosts = async (req, res, next) => {
 
 exports.getOnePost = async (req, res, next) => {
     try {
-        let post = await Post.findById(req.params.id)
-        res.json(post);
+        let post = await (await Post.findById(req.params.id))
+        if (!post) {
+            throw new ResourceNotFound('post')
+        }
+        res.json(post.populate('creator'));
     } catch (err) {
         next(err);
     }
 }
 
+
+
 exports.createPost = async (req, res, next) => {
     try {
-        const post = new Post({
-            title: req.body.title,
-            body: req.body.body,
-        });
+        const post = new Post(req.body);
         await post.save();
         res.json(post);
     } catch (err) {
@@ -34,12 +37,12 @@ exports.createPost = async (req, res, next) => {
 
 exports.updateOnePost = async (req, res, next) => {
     try {
-        let post = await Post.findByIdAndUpdate(req.params.id, {
-            title: req.body.title,
-            body: req.body.body,
-        }, {
-            new: true
-        })
+        let post = await (await Post.findById(req.params.id))
+        if (!post) {
+            throw new ResourceNotFound('post')
+        }
+        post.update(req.body)
+        post.save();
         res.json(post);
     } catch (err) {
         next(err);
@@ -48,7 +51,11 @@ exports.updateOnePost = async (req, res, next) => {
 
 exports.deleteOnePost = async (req, res, next) => {
     try {
-        let post = await Post.findByIdAndDelete(req.params.id);
+        let post = await (await Post.findById(req.params.id))
+        if (!post) {
+            throw new ResourceNotFound('post')
+        }
+        post.delete();
         res.json(post);
     } catch (err) {
         next(err);
