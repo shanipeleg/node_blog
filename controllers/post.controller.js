@@ -1,5 +1,6 @@
 const Post = require('../models/post.model')
 const ResourceNotFound = require('../errors/ResourceNotFound.error');
+const User = require('../models/user.model')
 
 exports.getAllPosts = async (req, res, next) => {
     try {
@@ -26,9 +27,20 @@ exports.getOnePost = async (req, res, next) => {
 
 exports.createPost = async (req, res, next) => {
     try {
+
+        let user = await User.findById(req.body.creator)
+        if (!user) {
+            throw new Error('Creator user not found!')
+        }
+
         const post = new Post(req.body);
+        //push new post ID into user posts array
+        user.posts.push(post._id)
+        user.save();
+
         await post.save();
         res.json(post);
+
     } catch (err) {
         next(err);
     }
